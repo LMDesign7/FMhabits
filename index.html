@@ -399,18 +399,17 @@ function showSync(t,type='') { const b=document.getElementById('syncBar'); docum
 async function syncToSheet() {
   const c=getConfig(); if(!c.url) return; showSync('Synchronisation...');
   try {
-    const payload = {
-      action: 'update',
-      token: c.token,
+    const params = new URLSearchParams({
+      token:   c.token,
       sheetId: c.id,
       sheetTab: c.tab,
-      date: toSheetDate(selectedDate),
-      jour: JOURS[selectedDate.getDay()],
-      headers: HABITS.map(h=>h.col),
-      values: HABITS.map(h=>state[h.id]===1?1:0)
-    };
-    const url = c.url + '?data=' + encodeURIComponent(JSON.stringify(payload));
-    await fetch(url, { method:'GET', mode:'no-cors' });
+      action:  'update',
+      date:    toSheetDate(selectedDate),
+      jour:    JOURS[selectedDate.getDay()],
+      headers: JSON.stringify(HABITS.map(h=>h.col)),
+      values:  JSON.stringify(HABITS.map(h=>state[h.id]===1?1:0))
+    });
+    await fetch(c.url + '?' + params.toString(), { method:'GET', mode:'no-cors' });
     showSync('Synchronisé ✓','success');
   } catch(e){ showSync('Erreur ✗','error'); }
 }
