@@ -398,7 +398,21 @@ function updateProgress() {
 function showSync(t,type='') { const b=document.getElementById('syncBar'); document.getElementById('syncText').textContent=t; b.className='sync-bar visible '+type; setTimeout(()=>b.classList.remove('visible'),2500); }
 async function syncToSheet() {
   const c=getConfig(); if(!c.url) return; showSync('Synchronisation...');
-  try { await fetch(c.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',token:c.token,sheetId:c.id,sheetTab:c.tab,date:toSheetDate(selectedDate),jour:JOURS[selectedDate.getDay()],headers:HABITS.map(h=>h.col),values:HABITS.map(h=>state[h.id]===1?1:0)})}); showSync('Synchronisé ✓','success'); } catch(e){ showSync('Erreur ✗','error'); }
+  try {
+    const payload = {
+      action: 'update',
+      token: c.token,
+      sheetId: c.id,
+      sheetTab: c.tab,
+      date: toSheetDate(selectedDate),
+      jour: JOURS[selectedDate.getDay()],
+      headers: HABITS.map(h=>h.col),
+      values: HABITS.map(h=>state[h.id]===1?1:0)
+    };
+    const url = c.url + '?data=' + encodeURIComponent(JSON.stringify(payload));
+    await fetch(url, { method:'GET', mode:'no-cors' });
+    showSync('Synchronisé ✓','success');
+  } catch(e){ showSync('Erreur ✗','error'); }
 }
 function scheduleSync() { clearTimeout(syncTimeout); syncTimeout=setTimeout(syncToSheet,1200); }
 
