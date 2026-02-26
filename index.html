@@ -400,15 +400,16 @@ async function syncToSheet() {
   const c=getConfig(); if(!c.url) return; showSync('Synchronisation...');
   try {
     const params = new URLSearchParams({
-      token:   c.token,
-      sheetId: c.id,
+      token:    c.token,
+      sheetId:  c.id,
       sheetTab: c.tab,
-      action:  'update',
-      date:    toSheetDate(selectedDate),
-      jour:    JOURS[selectedDate.getDay()],
-      headers: JSON.stringify(HABITS.map(h=>h.col)),
-      values:  JSON.stringify(HABITS.map(h=>state[h.id]===1?1:0))
+      action:   'update',
+      date:     toSheetDate(selectedDate),
+      jour:     JOURS[selectedDate.getDay()],
+      values:   JSON.stringify(HABITS.map(h=>state[h.id]===1?1:0))
     });
+    // Ajoute chaque header encodé séparément pour éviter les pb de caractères spéciaux
+    HABITS.forEach((h, i) => params.append('h' + i, h.col));
     await fetch(c.url + '?' + params.toString(), { method:'GET', mode:'no-cors' });
     showSync('Synchronisé ✓','success');
   } catch(e){ showSync('Erreur ✗','error'); }
